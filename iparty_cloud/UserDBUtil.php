@@ -7,7 +7,7 @@
  */
 
 class UserDBUtil{
-    public static function getUserByUserName($userName){
+    public static function getUserByUserName($username){
         $conn = DBUtil::connectDB();
         $result = mysql_query("select * from user where username='{$username}'", $conn);
         $user = [];
@@ -28,8 +28,9 @@ class UserDBUtil{
         $con = DBUtil::connectDB();
         $pwd = md5($password);
         $ret = mysql_query("insert into user (username,password) VALUES('{$username}', '{$pwd}')", $con);
+        $id = mysql_insert_id();
         mysql_close($con);
-        return $ret ? mysql_insert_id() : 0;
+        return $ret ? $id : 0;
     }
     
     public static function updateUser($username, $nick, $avatar, $gender){
@@ -39,15 +40,15 @@ class UserDBUtil{
         }
         if($avatar != NULL){
             if(!empty($sentence)){
-                $sentence += ',';
+                $sentence .= ',';
             }
-            $sentence += "avatar='{$avatar}'";
+            $sentence .= "avatar='{$avatar}'";
         }
         if($gender != NULL){
             if(!empty($sentence)){
-                $sentence += ',';
+                $sentence .= ',';
             }
-            $sentence += "gender='{$gender}'";
+            $sentence .= "gender='{$gender}'";
         }
         if(empty($sentence)){
             return TRUE;
