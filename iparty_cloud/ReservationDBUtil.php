@@ -17,6 +17,36 @@ class ReservationDBUtil{
         
     }
     
+    public static function getReservationByUserId($userId){
+        $connection = DBUtil::connectDB();
+        $result = mysql_query("select * from reservation where customer_id={$userId}", $connection);
+        $reservations = [];
+        while($row = mysql_fetch_array($result)){
+            $r['customerId'] = $row['customer_id'];
+            $r['consumeSet'] = ConsumeSetDBUtil::getSetById($row['consume_set_id']);
+            $r['club'] = ClubDBUtil::getClubById($row['club_id']);
+            $r['status'] = $row['status'];
+            $reservations[] = $r;
+        }
+        mysql_close();        
+        return $reservations;
+    }
+    
+    public static function getReservationById($id){
+        $connection = DBUtil::connectDB();
+        $result = mysql_query("select * from reservation where id={$id}", $connection);
+        $reservations = [];
+        while($row = mysql_fetch_array($result)){
+            $r['customerId'] = $row['customer_id'];
+            $r['consumeSet'] = ConsumeSetDBUtil::getSetById($row['consume_set_id']);
+            $r['club'] = ClubDBUtil::getClubById($row['club_id']);
+            $r['status'] = $row['status'];
+            $reservations[] = $r;
+        }
+        mysql_close();        
+        return $reservations;        
+    }
+    
     public static function updateStatusAndPayChannel($status, $channel = NULL) {
         $connection = DBUtil::connectDB();
         $ret = mysql_query("update reservation set status='{$status}',pay_channel='{$channel}'", $connection);

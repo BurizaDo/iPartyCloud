@@ -7,8 +7,8 @@
  */
 class DBUtil{
     public static function connectDB(){
-        $con = mysql_connect('127.0.0.1', 'root', 'root');
-//        mysql_query("SET NAMES 'UTF8'", $con);          
+        $con = mysql_connect('localhost:8888', 'root', 'root');
+        mysql_query("SET NAMES 'UTF8'", $con);          
         mysql_select_db('iParty', $con);
         return $con;
     }

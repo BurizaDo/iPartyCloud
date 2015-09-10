@@ -10,23 +10,26 @@ class ClubDBUtil{
     public static function addClub($name, $longitude, $latitude, $images, $address, $meta = NULL){
         $connection = DBUtil::connectDB();
         $result = mysql_query("insert into club (name, longitude, latitude, images, address, meta) values ('{$name}', '{$longitude}', '{$latitude}', '{$images}', '{$address}', '{$meta}')", $connection);
+        $id = mysql_insert_id();
         mysql_close();
-        return $result != FALSE ? TRUE : FALSE;
+        return $result != FALSE ? $id : FALSE;
     }
     
     public static function getClubs($userLongitude, $userLatitude, $range = 10){
         $searchRange = 180 / pi() * ($range / 6372.797);
-        $lngR = $searchRange / cos($userLatitude * pi() / 180.0); 
+        $lngR = abs($searchRange / cos($userLatitude * pi() / 180.0)); 
         $maxLat = $userLatitude + $searchRange; 
         $minLat = $userLatitude - $searchRange;
         $maxLng = $userLongitude + $lngR; 
         $minLng = $userLongitude - $lngR;
         $con = DBUtil::connectDB();
-        $result = mysql_query("SELECT * FROM club where ((latitude BETWEEN {$minLat} AND {$maxLat}) AND (longitude BETWEEN {$minLng} AND {$maxLng})", $con);
+        $sql = "SELECT * FROM club where ((latitude BETWEEN {$minLat} AND {$maxLat}) AND (longitude BETWEEN {$minLng} AND {$maxLng}))";
+        $result = mysql_query($sql, $con);
         $clubs = [];
        
         while($row = mysql_fetch_array($result)){
             $r = [];
+            $r['id'] = $row['id'];
             $r['name'] = $row['name'];
             $r['longitude'] = $row['longitude'];
             $r['latitude'] = $row['latitude'];

@@ -13,6 +13,7 @@ class UserDBUtil{
         $user = [];
         while($row = mysql_fetch_array($result)){
             $r = [];
+            $r['password'] = $row['password'];
             $r['id'] = $row['id'];
             $r['nick'] = $row['nick'];
             $r['gender'] = $row['gender'];
@@ -23,6 +24,24 @@ class UserDBUtil{
         mysql_close($conn);
         return $user;
     }
+    
+    public static function getUserById($userId){
+        $conn = DBUtil::connectDB();
+        $result = mysql_query("select * from user where id='{$userId}'", $conn);
+        $user = [];
+        while($row = mysql_fetch_array($result)){
+            $r = [];
+            $r['password'] = $row['password'];
+            $r['id'] = $row['id'];
+            $r['nick'] = $row['nick'];
+            $r['gender'] = $row['gender'];
+            $r['avatar'] = $row['avatar'];
+            $r['username'] = $row['username'];
+            $user[] = $r;
+        }        
+        mysql_close($conn);
+        return $user;
+    }    
     
     public static function addUser($username, $password){
         $con = DBUtil::connectDB();

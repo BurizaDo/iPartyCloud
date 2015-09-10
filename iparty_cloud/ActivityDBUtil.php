@@ -8,10 +8,12 @@
 class ActivityDBUtil{
     public static function addActivity($clubId, $title, $images, $content, $validTimeStart = 0, $validTimeEnd = 0){
         $connection = DBUtil::connectDB();
-        $result = mysql_query("insert into activity (club_id, title, images, content, valid_time_start, valid_time_end) "
-                . "values ('{$clubId}', '{$title}', '{$images}', '{$content}', '{$validTimeStart}', '{$validTimeEnd}')", $connection);
+        $sql = "insert into activity (club_id, title, images, content, valid_time_start, valid_time_end) "
+                . "values ('{$clubId}', '{$title}', '{$images}', '{$content}', '{$validTimeStart}', '{$validTimeEnd}')";
+        $result = mysql_query($sql, $connection);
+        $id = mysql_insert_id();
         mysql_close();
-        return $result != FALSE ? TRUE : FALSE;
+        return $result != FALSE ? $id : FALSE;
     }
     
     public static function getActivities($start, $size = 30){
@@ -27,7 +29,8 @@ class ActivityDBUtil{
             $r['content'] = $row['content'];
             $r['valid_time_start'] = $row['valid_time_start'];
             $r['valid_time_end'] = $row['valid_time_end'];
-            $r['publish_time'] = json_decode($row['publish_time']);
+            $r['publish_time'] = $row['publish_time'];
+            $r['user_ids'] = json_decode($row['user_ids']);
             $r['club'] = ClubDBUtil::getClubById($row['club_id']);
             $activities[] = $r;
         }
@@ -45,7 +48,8 @@ class ActivityDBUtil{
             $r['content'] = $row['content'];
             $r['valid_time_start'] = $row['valid_time_start'];
             $r['valid_time_end'] = $row['valid_time_end'];
-            $r['publish_time'] = json_decode($row['publish_time']);
+            $r['publish_time'] = $row['publish_time'];
+            $r['user_ids'] = json_decode($row['user_ids']);
             $r['club'] = ClubDBUtil::getClubById($row['club_id']);
             $activities[] = $r;
         }
@@ -55,11 +59,17 @@ class ActivityDBUtil{
     
     public static function joinActivity($userId, $activityId){
         $activity = self::getActivityById($activityId);
-        if(empty($activity)) return;
+        if(empty($activity)) return FALSE;
         $currentIds = $activity[0]['user_ids'];
-        $newIds = trim("{$currentIds} {$userId}");
+        if($currentIds != null){
+            $newIds = $currentIds;
+        }else{
+            $newIds = [];
+        }
+        $newIds[] = $userId;
+        $jsonIds = json_encode($newIds);
         $conn = DBUtil::connectDB();
-        $result = mysql_query("update activity set user_ids={$newIds} where id={$activityId}", $conn);
+        $result = mysql_query("update activity set user_ids='{$jsonIds}' where id={$activityId}", $conn);
         mysql_close();
         return $result != FALSE ? TRUE : FALSE;
     }
@@ -67,16 +77,15 @@ class ActivityDBUtil{
     public static function cancelJoinActivity($userId, $activityId){
         $activity = self::getActivityById($activityId);
         $userIds = $activity[0]['user_ids'];
-        $idArray = split(' ', $userIds);
-        foreach($idArray as $key => $id){
+        foreach($userIds as $key => $id){
             if($id == $userId){
-                unset($idArray[$key]);    
+                unset($userIds[$key]);    
                 break;
             }
         }
-        $newIds = implode(' ', $idArray);
+        $newIds = json_encode($userIds);
         $conn = DBUtil::connectDB();
-        $result = mysql_query("update activity set user_ids={$newIds} where id={$activityId}", $conn);
+        $result = mysql_query("update activity set user_ids='{$newIds}' where id={$activityId}", $conn);
         mysql_close();
         return $result != FALSE ? TRUE : FALSE;
     }
