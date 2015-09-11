@@ -77,14 +77,40 @@ class Api{
         return ActivityDBUtil::cancelJoinActivity($user['id'], $activityId);
     }
     
-    public function addReservation($setId, $userId){
+    public function addReservation($setId, $username){
         $set = self::checkSet($setId);
-        return ReservationDBUtil::addReservation($userId, $set[0]['clubId'], $set[0]['id'], 1);
+        $user = self::checkUser($username);
+        
+        $reservations = self::getReservationByUsername($username);
+        foreach($reservations as $r){
+            if($r['customerId'] == $user[0]['id']){
+                throw new Exception('该用户已订此套餐', 1118);                
+            }
+        }
+        return ReservationDBUtil::addReservation($user[0]['id'], $set[0]['clubId'], $set[0]['id'], 1);
     }
     
-    public function getReservationByUserId($userId){
-        $user = self::checkUser
+    //reservation status  
+    //1:reserved not paid, not used 2:reserved and paid not used 3:reserved and paid and used 4:cancelled
+    public function getReservationByUsername($username){
+        $user = self::checkUser($username);
+        return ReservationDBUtil::getReservationByUserId($user[0]['id']);
+    }
+    
+    public function cancelReservation($reservationId, $username){
+        $user = self::checkUser($username);
+        $reservations = ReservationDBUtil::getReservationByUserId($user[0]['id']);
+        foreach($reservations as $r){
+            if($r['id'] == $reservationId){
+                return ReservationDBUtil::updateStatusAndPayChannel($reservationId, 4);
+            }
+        }
+        throw new Exception('用户与套餐不匹配', 1119);
+    }
+    
+    public function updateReservationPayStatus($paid, $channel){
         
+        ReservationDBUtil::updateStatusAndPayChannel($status)
     }
     
     private function checkSet($setId){
