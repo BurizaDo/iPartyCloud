@@ -108,9 +108,26 @@ class Api{
         throw new Exception('用户与套餐不匹配', 1119);
     }
     
-    public function updateReservationPayStatus($paid, $channel){
-        
-        ReservationDBUtil::updateStatusAndPayChannel($status)
+    public function updateReservationPayStatus($reservationId, $paid, $channel){
+        self::checkReservation($reservationId);
+        if($paid){
+            return ReservationDBUtil::updateStatusAndPayChannel($reservationId, 2, $channel);
+        }else{
+            return ReservationDBUtil::updateStatusAndPayChannel($reservationId, 1);
+        }
+    }
+    
+    public function updateReservationUsed($reservationId){
+        self::checkReservation($reservationId);
+        return ReservationDBUtil::updateStatusAndPayChannel($reservationId, 3);
+    }
+    
+    private function checkReservation($reservationId){
+        $reservations = ReservationDBUtil::getReservationById($reservationId);
+        if($reservations == null || empty($reservations)){
+            throw new Exception('no such reservation', 1122);
+        }
+        return $reservations;
     }
     
     private function checkSet($setId){
