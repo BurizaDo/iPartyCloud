@@ -1,9 +1,3 @@
-<!DOCTYPE html>
-<!--
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
--->
 <?php
 
 header('Content-Type: text/html; charset=utf-8');
@@ -13,7 +7,7 @@ require_once 'DBUtil.php';
 if($_GET['api']){
     $params = (new ReflectionMethod('Api', $_GET['api']))->getParameters();
     $call_pars = [];
-    $rawPost = file_get_contents("php://input");    
+    $rawPost = file_get_contents("php://input");  
     $values = (($_SERVER['REQUEST_METHOD'] === 'POST') ? (empty($rawPost) ? [] : json_decode($rawPost, TRUE)) : $_GET);
     try{
         foreach($params as $par){        
